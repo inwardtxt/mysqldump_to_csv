@@ -1,15 +1,9 @@
-#!/usr/bin/env python
 import fileinput
 import csv
 import sys
 
-# This prevents prematurely closed pipes from raising
-# an exception in Python
-from signal import signal, SIGPIPE, SIG_DFL
-signal(SIGPIPE, SIG_DFL)
-
 # allow large content in the dump
-csv.field_size_limit(sys.maxsize)
+csv.field_size_limit((2**31)-1)
 
 def is_insert(line):
     """
@@ -97,17 +91,19 @@ def main():
     """
     Parse arguments and start the program
     """
-    # Iterate over all lines in all files
-    # listed in sys.argv[1:]
-    # or stdin if no args given.
+    # Iterate over all lines in file listed in sys.argv[1]
+    # and puts into csv in file listed in sys.argv[2]
     try:
-        for line in fileinput.input():
-            # Look for an INSERT statement and parse it.
-            if is_insert(line):
-                values = get_values(line)
-                if values_sanity_check(values):
-                    parse_values(values, sys.stdout)
+        infile, outfile = sys.argv[1],sys.argv[2]
+        with open(outfile, 'w', encoding='utf-8', newline='') as outfile:
+            for line in fileinput.input(files=(infile), encoding='latin-1'):
+                # Look for an INSERT statement and parse it.
+                if is_insert(line):
+                    values = get_values(line)
+                    if values_sanity_check(values): 
+                        parse_values(values, outfile)
     except KeyboardInterrupt:
+        outfile.close()
         sys.exit(0)
 
 if __name__ == "__main__":

@@ -95,7 +95,7 @@ def main():
     # and puts into csv in file listed in sys.argv[2]
     try:
         infile, outfile = sys.argv[1],sys.argv[2]
-        with open(outfile, 'w', encoding='utf-8', newline='') as outfile:
+        with open(outfile, 'w', encoding='latin-1', newline='') as outfile:
             for line in fileinput.input(files=(infile), encoding='latin-1'):
                 # Look for an INSERT statement and parse it.
                 if is_insert(line):
